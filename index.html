@@ -1,8 +1,8 @@
 <!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}</style></head><body>
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}</style></head><body>
 <title>Пустая затяжка</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Golos+Text:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Golos+Text:wght@400;500;600&family=Tilt+Neon&display=swap">
 <style>
 /* Layout: one-screen app — 3D stage you press on the left, tracker panel on the right (stacks under on phones). Single dark "night smoke-break" world. */
 :root{
@@ -26,7 +26,7 @@ header{grid-column:1/-1;display:flex;align-items:center;gap:16px;flex-wrap:wrap;
 h1{font:700 19px/1.1 var(--display);margin:0;letter-spacing:-.01em}
 .brand p{margin:3px 0 0;color:var(--muted);font-size:13px}
 .tabs{display:flex;background:var(--bg2);border:1px solid var(--line);border-radius:999px;padding:4px;gap:4px}
-.tabs button{font:600 14px var(--body);color:var(--muted);background:none;border:0;border-radius:999px;padding:9px 16px;cursor:pointer}
+.tabs button{font:600 14px var(--body);color:var(--muted);background:none;border:0;border-radius:999px;padding:9px 14px;cursor:pointer}
 .tabs button[aria-selected="true"]{background:var(--fg);color:var(--bg)}
 .icon-btn{width:42px;height:42px;border-radius:50%;border:1px solid var(--line);background:var(--bg2);color:var(--fg);display:grid;place-items:center;cursor:pointer}
 button:focus-visible,#stage:focus-visible,input:focus-visible,summary:focus-visible{outline:2px solid var(--peach);outline-offset:2px}
@@ -37,7 +37,7 @@ button:focus-visible,#stage:focus-visible,input:focus-visible,summary:focus-visi
 .today{position:absolute;left:22px;top:18px;pointer-events:none}
 .today b{display:block;font:800 clamp(40px,7vw,64px)/1 var(--display);font-variant-numeric:tabular-nums;letter-spacing:-.03em}
 .today span{color:var(--muted);font-size:13px;text-transform:uppercase;letter-spacing:.08em}
-.hint{position:absolute;left:0;right:0;bottom:22px;text-align:center;color:var(--muted);font-size:14px;pointer-events:none;transition:color .2s}
+.hint{position:absolute;left:50%;transform:translateX(-50%);bottom:18px;max-width:calc(100% - 32px);text-align:center;color:#c9d0de;font-size:14px;pointer-events:none;transition:color .2s;background:#11151fcc;padding:7px 14px;border-radius:999px;backdrop-filter:blur(6px)}
 .hint.warn{color:var(--peach)}
 .meter{position:absolute;left:50%;bottom:52px;width:min(260px,60%);height:6px;margin-left:calc(min(260px,60%) / -2);border-radius:6px;background:#ffffff14;overflow:hidden;opacity:0;transition:opacity .2s;pointer-events:none}
 .meter.on{opacity:1}
@@ -56,7 +56,7 @@ aside{display:flex;flex-direction:column;gap:14px;min-width:0}
 .stat{background:var(--bg2);border-radius:16px;padding:12px 14px}
 .stat b{display:block;font:700 22px var(--display);font-variant-numeric:tabular-nums}
 .stat span{color:var(--muted);font-size:12.5px}
-.stat.vape b{color:var(--peach)} .stat.snus b{color:var(--mint)}
+.stat.vape b{color:var(--peach)} .stat.snus b{color:var(--mint)} .stat.hook b{color:#ff8ae2}
 .rows{display:flex;flex-direction:column;gap:10px}
 .row{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
 .row span{color:var(--muted)}
@@ -92,6 +92,7 @@ details[open] summary::after{content:"–"}
     <div class="tabs" role="tablist" aria-label="Режим">
       <button id="tab-snus" role="tab" aria-selected="true">Шайба</button>
       <button id="tab-vape" role="tab" aria-selected="false">Одноразка</button>
+      <button id="tab-hook" role="tab" aria-selected="false">Кальян</button>
     </div>
     <button id="mute" class="icon-btn" aria-label="Выключить звук" title="Звук">
       <svg id="ico-on" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor"/><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/></svg>
@@ -119,6 +120,8 @@ details[open] summary::after{content:"–"}
       <div class="stat snus"><b id="sPouchT">0</b><span>пакетиков сегодня</span></div>
       <div class="stat"><b id="sPuffA">0</b><span>затяжек всего</span></div>
       <div class="stat"><b id="sPouchA">0</b><span>пакетиков всего</span></div>
+      <div class="stat hook"><b id="sHookT">0</b><span>кальянных сегодня</span></div>
+      <div class="stat"><b id="sHookA">0</b><span>кальянных всего</span></div>
     </section>
 
     <section class="card">
@@ -154,7 +157,7 @@ details[open] summary::after{content:"–"}
 (() => {
 /* ---------- state ---------- */
 const KEY = 'pustaya-zatyazhka-v1';
-const def = () => ({ quitAt: Date.now(), puffs: 0, pouches: 0, puffSec: 0, day: {}, mode: 'snus', muted: false,
+const def = () => ({ quitAt: Date.now(), puffs: 0, pouches: 0, puffSec: 0, hookah: 0, day: {}, mode: 'snus', muted: false,
   cfg: { puffs: 300, pouches: 12, rub: 450, sec: 2.5 } });
 let S = def();
 try { const s = JSON.parse(localStorage.getItem(KEY)); if (s) { S = Object.assign(def(), s); S.cfg = Object.assign(def().cfg, s.cfg || {}); } } catch (e) {}
@@ -227,6 +230,25 @@ const A = (() => {
     exhale(sec) { const t = ctx().currentTime + 0.12, d = 0.9 + Math.min(sec, 6) * 0.25;
       const s = noise(); const lp = filt('lowpass', 1500, 0.6); lp.frequency.setValueAtTime(1500, t); lp.frequency.exponentialRampToValueAtTime(220, t + d);
       const g = env(t, 0.2, 0.12, d); s.connect(lp).connect(g).connect(master); s.start(t, Math.random()); s.stop(t + d + 0.3); },
+    hookStart() { const t = ctx().currentTime;
+      const air = noise(true), lp = filt('lowpass', 420, 0.6), ag = ac.createGain();
+      ag.gain.setValueAtTime(0.0001, t); ag.gain.exponentialRampToValueAtTime(0.2, t + 0.3);
+      air.connect(lp).connect(ag).connect(master); air.start(t);
+      const h = { air, ag, t0: t, on: true }; this._hook = h;
+      const bloop = () => { if (!h.on) return; const n = ac.currentTime, k = Math.min(1, (n - h.t0) / 0.6);
+        const f = 110 + Math.random() * 170, d = 0.04 + Math.random() * 0.05;
+        tone(n, f, f * (2.2 + Math.random()), (0.12 + Math.random() * 0.22) * (0.3 + 0.7 * k), d);
+        burst(n, 260 + Math.random() * 200, 0.18 * k, 0.03, 'lowpass', 0.8);
+        if (Math.random() < 0.3) tone(n + 0.02, f * 1.6, f * 3.5, 0.08 * k, 0.03);
+        h.tm = setTimeout(bloop, 40 + Math.random() * 75 * (1.3 - k * 0.5)); };
+      h.tm = setTimeout(bloop, 120);
+    },
+    hookStop() { const h = this._hook; if (!h) return; this._hook = null; h.on = false; clearTimeout(h.tm);
+      const t = ac.currentTime; h.ag.gain.cancelScheduledValues(t); h.ag.gain.setTargetAtTime(0.0001, t, 0.04); h.air.stop(t + 0.3);
+      for (let i = 0; i < 3; i++) tone(t + i * 0.07, 160 - i * 20, 300, 0.1 / (i + 1), 0.05); },
+    exhaleThick(sec) { const t = ctx().currentTime + 0.15, d = 1.6 + Math.min(sec, 10) * 0.3;
+      const s = noise(); const lp = filt('lowpass', 1100, 0.5); lp.frequency.setValueAtTime(1100, t); lp.frequency.exponentialRampToValueAtTime(160, t + d);
+      const g = env(t, 0.28, 0.2, d); s.connect(lp).connect(g).connect(master); s.start(t, Math.random()); s.stop(t + d + 0.4); },
     beep() { const t = ctx().currentTime; tone(t, 1800, 1800, 0.08, 0.08, 'square'); tone(t + 0.12, 1800, 1800, 0.08, 0.08, 'square'); },
   };
 })();
@@ -321,34 +343,112 @@ const glow = new THREE.Sprite(new THREE.SpriteMaterial({ map: softTex, color: 0x
 glow.position.set(0, -1.5, 0.5); glow.scale.setScalar(1.1); vape.add(glow);
 vape.position.y = 2.05; vape.rotation.z = 0.1;
 
+/* --- комната и неон MOODS --- */
+const room = new THREE.Group(); scene.add(room);
+const roomMats = [];
+const rmat = m => { m.transparent = true; m.opacity = 0; roomMats.push([m, m.userData.o ?? 1]); return m; };
+const brickTex = canvasTex(1024, 512, (g, w, h) => {
+  g.fillStyle = '#100c15'; g.fillRect(0, 0, w, h);
+  const bw = 128, bh = 48;
+  for (let y = 0, r = 0; y < h; y += bh, r++) for (let x = -(r % 2) * bw / 2; x < w; x += bw) {
+    const v = 26 + Math.random() * 14; g.fillStyle = `rgb(${v + 8},${v - 2},${v + 14})`; g.fillRect(x + 4, y + 4, bw - 8, bh - 8); }
+});
+brickTex.wrapS = brickTex.wrapT = THREE.RepeatWrapping; brickTex.repeat.set(4, 3);
+const wall = new THREE.Mesh(new THREE.PlaneGeometry(40, 20), new THREE.MeshStandardMaterial({ map: brickTex, roughness: 0.95 }));
+wall.position.set(0, 10, -4.5); room.add(wall);
+const floor = new THREE.Mesh(new THREE.PlaneGeometry(40, 24), new THREE.MeshStandardMaterial({ color: 0x0d0912, roughness: 0.8 }));
+floor.rotation.x = -Math.PI / 2; floor.position.set(0, -0.003, 6); room.add(floor);
+const neonTex = canvasTex(1024, 300, (g, w, h) => {
+  g.textAlign = 'center'; g.textBaseline = 'middle'; g.font = '400 210px "Tilt Neon", "Golos Text", sans-serif';
+  g.lineJoin = 'round';
+  [[60, '#ff2fd0', 14], [30, '#ff4fe0', 10], [12, '#ffb0f4', 6]].forEach(([b, c, lw]) => { g.shadowColor = c; g.shadowBlur = b; g.strokeStyle = c; g.lineWidth = lw; g.strokeText('MOODS', w / 2, h / 2 + 8); });
+  g.shadowBlur = 0; g.strokeStyle = '#fff2fd'; g.lineWidth = 3; g.strokeText('MOODS', w / 2, h / 2 + 8);
+});
+const neonMat = rmat(new THREE.MeshBasicMaterial({ map: neonTex, depthWrite: false, blending: THREE.AdditiveBlending, toneMapped: false }));
+const neon = new THREE.Mesh(new THREE.PlaneGeometry(7.2, 2.1), neonMat); neon.position.set(0, 5.9, -4.4); room.add(neon);
+const neonGlowMat = rmat(new THREE.SpriteMaterial({ map: softTex, color: 0xff3fd0, depthWrite: false, blending: THREE.AdditiveBlending }));
+neonGlowMat.userData.o = 0.32; roomMats[roomMats.length - 1][1] = 0.32;
+const neonGlow = new THREE.Sprite(neonGlowMat); neonGlow.position.set(0, 5.9, -4.45); neonGlow.scale.set(13, 5, 1); room.add(neonGlow);
+const stripMat = rmat(new THREE.MeshBasicMaterial({ color: 0x5fe8ff, toneMapped: false }));
+const strip = new THREE.Mesh(new THREE.PlaneGeometry(40, 0.06), stripMat); strip.position.set(0, 0.25, -4.44); room.add(strip);
+const neonLight = new THREE.PointLight(0xff3fd0, 0, 16, 1.6); neonLight.position.set(0, 5, -3); scene.add(neonLight);
+const cyanLight = new THREE.PointLight(0x5fe8ff, 0, 10, 1.6); cyanLight.position.set(3, 0.6, -3.5); scene.add(cyanLight);
+let flick = 0;
+
+/* --- кальян --- */
+const hook = new THREE.Group(); hook.position.x = -0.4; scene.add(hook);
+const V = (x, y) => new THREE.Vector2(x, y);
+const glass = new THREE.Mesh(new THREE.LatheGeometry([V(0, 0), V(0.9, 0), V(1.05, 0.08), V(1.25, 0.5), V(1.22, 0.9), V(1.0, 1.3), V(0.55, 1.65), V(0.34, 1.85), V(0.34, 2.0)], 64),
+  new THREE.MeshPhysicalMaterial({ color: 0xa48bff, transparent: true, opacity: 0.3, roughness: 0.05, clearcoat: 1, side: THREE.DoubleSide, depthWrite: false }));
+glass.renderOrder = 2; hook.add(glass);
+const water = new THREE.Mesh(new THREE.LatheGeometry([V(0, 0.04), V(0.88, 0.04), V(1.0, 0.1), V(1.18, 0.5), V(1.165, 0.9), V(0, 0.9)], 64),
+  new THREE.MeshPhysicalMaterial({ color: 0x4fd0ff, transparent: true, opacity: 0.42, roughness: 0.1, depthWrite: false }));
+water.renderOrder = 1; hook.add(water);
+const metal = new THREE.MeshStandardMaterial({ color: 0xd2d5e0, metalness: 0.55, roughness: 0.28 });
+const cyl = (r1, r2, h, y, mat = metal) => { const m = new THREE.Mesh(new THREE.CylinderGeometry(r1, r2, h, 32), mat); m.position.y = y; hook.add(m); return m; };
+cyl(0.06, 0.06, 1.75, 1.12);            // шахта в колбе
+cyl(0.36, 0.36, 0.14, 2.02);            // уплотнитель
+cyl(0.12, 0.14, 1.75, 2.95);            // шахта
+[2.35, 2.9, 3.45].forEach(y => { const r = new THREE.Mesh(new THREE.TorusGeometry(0.17, 0.045, 12, 32), metal); r.rotation.x = Math.PI / 2; r.position.y = y; hook.add(r); });
+cyl(0.9, 0.86, 0.06, 3.82);             // блюдце
+const clay = new THREE.MeshStandardMaterial({ color: 0xb85c3a, roughness: 0.8 });
+const bowl = new THREE.Mesh(new THREE.LatheGeometry([V(0.12, 0), V(0.2, 0.05), V(0.42, 0.36), V(0.5, 0.48), V(0.5, 0.55), V(0, 0.55)], 40), clay);
+bowl.position.y = 3.85; hook.add(bowl);
+cyl(0.55, 0.55, 0.08, 4.44, new THREE.MeshStandardMaterial({ color: 0x55586a, metalness: 0.6, roughness: 0.35 })); // калауд
+const coalMat = new THREE.MeshStandardMaterial({ color: 0x2a1a14, emissive: 0xff5a1f, emissiveIntensity: 0.6, roughness: 1 });
+[[-0.2, -0.12, 0.2], [0.2, -0.1, -0.3], [0.02, 0.24, 0.9]].forEach(([x, z, r]) => { const c = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.14, 0.3), coalMat); c.position.set(x, 4.55, z); c.rotation.y = r; hook.add(c); });
+const coalGlow = new THREE.Sprite(new THREE.SpriteMaterial({ map: softTex, color: 0xff6a2a, transparent: true, opacity: 0.4, depthWrite: false, blending: THREE.AdditiveBlending }));
+coalGlow.position.set(0, 4.65, 0); coalGlow.scale.setScalar(1.8); hook.add(coalGlow);
+const coalLight = new THREE.PointLight(0xff6a2a, 0.6, 5, 2); coalLight.position.set(0, 4.9, 0.3); hook.add(coalLight);
+const port = cyl(0.07, 0.07, 0.5, 2.5); port.rotation.z = Math.PI / 2; port.position.x = 0.3;
+const hoseCurve = new THREE.CatmullRomCurve3([[0.55, 2.5, 0], [1.3, 2.1, 0.3], [1.95, 1.0, 0.9], [2.15, 0.45, 1.9], [2.0, 0.9, 2.9], [1.55, 1.9, 3.4]].map(a => new THREE.Vector3(...a)));
+hook.add(new THREE.Mesh(new THREE.TubeGeometry(hoseCurve, 90, 0.075, 12), new THREE.MeshStandardMaterial({ color: 0x2b2238, roughness: 0.45 })));
+const mp = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.1, 0.75, 20), metal);
+const tg = hoseCurve.getTangent(1); mp.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), tg);
+mp.position.copy(hoseCurve.getPoint(1)).addScaledVector(tg, 0.35); hook.add(mp);
+const bubbles = [];
+const bubMat = new THREE.MeshBasicMaterial({ color: 0xe8fbff, transparent: true, opacity: 0.7, depthWrite: false });
+for (let i = 0; i < 50; i++) { const b = new THREE.Mesh(new THREE.SphereGeometry(1, 10, 8), bubMat); b.visible = false; b.renderOrder = 3; hook.add(b); bubbles.push({ m: b, v: 0 }); }
+let bubIdx = 0, bubAcc = 0;
+
 /* --- облако пара --- */
 const clouds = [];
-for (let i = 0; i < 110; i++) {
+for (let i = 0; i < 220; i++) {
   const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: softTex, color: 0xeef2ff, transparent: true, opacity: 0, depthWrite: false }));
   s.visible = false; scene.add(s); clouds.push({ s, life: 0, max: 1, v: new THREE.Vector3(), g: 1, o: 0.3 });
 }
 let cloudIdx = 0;
-function exhaleCloud(sec) {
-  const n = Math.min(100, Math.round(14 + sec * 16));
+function exhaleCloud(sec, thick) {
+  const n = thick ? Math.min(200, Math.round(50 + sec * 26)) : Math.min(100, Math.round(14 + sec * 16));
   for (let i = 0; i < n; i++) {
-    const c = clouds[cloudIdx++ % clouds.length], delay = Math.random() * Math.min(1.2, 0.25 + sec * 0.12);
-    c.s.visible = true; c.life = -delay; c.max = 2.4 + Math.random() * 1.6;
-    c.s.position.set((Math.random() - .5) * .6, 1.7 + Math.random() * .4, 6.2);
-    c.v.set((Math.random() - .5) * 1.8, 0.25 + Math.random() * .55, -(1.4 + Math.random() * 2.2));
-    c.g = 0.9 + Math.random() * 1.1; c.o = 0.07 + Math.random() * 0.1 * Math.min(1, sec / 2 + .4);
+    const c = clouds[cloudIdx++ % clouds.length], delay = Math.random() * Math.min(thick ? 2 : 1.2, 0.25 + sec * (thick ? 0.2 : 0.12));
+    c.s.visible = true; c.life = -delay;
+    if (thick) {
+      c.max = 4 + Math.random() * 3;
+      c.s.position.set((Math.random() - .5) * .9, 2.2 + Math.random() * .6, 7.5);
+      c.v.set((Math.random() - .5) * 2.4, 0.15 + Math.random() * .5, -(1.6 + Math.random() * 2.8));
+      c.g = 1.6 + Math.random() * 1.8; c.o = (0.12 + Math.random() * 0.16) * Math.min(1, sec / 2.5 + .5);
+      c.s.material.color.setHex(Math.random() < .5 ? 0xf3ecff : 0xffeef8);
+    } else {
+      c.max = 2.4 + Math.random() * 1.6;
+      c.s.position.set((Math.random() - .5) * .6, 1.7 + Math.random() * .4, 6.2);
+      c.v.set((Math.random() - .5) * 1.8, 0.25 + Math.random() * .55, -(1.4 + Math.random() * 2.2));
+      c.g = 0.9 + Math.random() * 1.1; c.o = 0.07 + Math.random() * 0.1 * Math.min(1, sec / 2 + .4);
+      c.s.material.color.setHex(0xeef2ff);
+    }
     c.s.material.rotation = Math.random() * 6.28; c.s.scale.setScalar(0.4); c.s.material.opacity = 0;
   }
 }
 
 /* ---------- interaction ---------- */
-let mode = S.mode === 'vape' ? 'vape' : 'snus';
-let tinS = mode === 'snus' ? 1 : 0, vapeS = mode === 'vape' ? 1 : 0;
-let holding = false, holdStart = 0, heat = 0, kick = 0;
+let mode = ['vape', 'hook'].includes(S.mode) ? S.mode : 'snus';
+let tinS = mode === 'snus' ? 1 : 0, vapeS = mode === 'vape' ? 1 : 0, hookS = mode === 'hook' ? 1 : 0;
+let holding = false, holdStart = 0, heat = 0, kick = 0, holdKind = 'vape';
 const MAX_HOLD = 8;
 
 function popText(txt) { const el = document.createElement('div'); el.className = 'pop'; el.textContent = txt; el.style.left = (44 + Math.random() * 12) + '%'; $('pops').appendChild(el); setTimeout(() => el.remove(), 1200); }
 function setHint(t, warn) { const h = $('hint'); h.textContent = t; h.classList.toggle('warn', !!warn); }
-const idleHint = () => setHint(mode === 'snus' ? 'Нажимай на шайбу' : 'Зажми и держи, отпусти — выдох');
+const idleHint = () => setHint(mode === 'snus' ? 'Нажимай на шайбу' : mode === 'vape' ? 'Зажми и держи, отпусти — выдох' : 'Зажми и тяни подольше, отпусти — облако');
 
 function snusClick() {
   const now = performance.now();
@@ -360,17 +460,22 @@ function snusClick() {
   flying.push(p); setTimeout(() => A.pouch(), 70);
   S.pouches++; today().s++; save(); popText('+1 под губу'); render();
 }
-function startPuff() { if (holding) return; holding = true; holdStart = performance.now(); A.vapeStart(); buzz(20); $('meter').classList.add('on'); setHint('Тяни…'); }
+function startPuff() { if (holding) return; holding = true; holdKind = mode; holdStart = performance.now(); if (mode === 'hook') A.hookStart(); else A.vapeStart(); buzz(20); $('meter').classList.add('on'); setHint('Тяни…'); }
 function endPuff(auto) {
-  if (!holding) return; holding = false; A.vapeStop(); $('meter').classList.remove('on');
+  if (!holding) return; holding = false; if (holdKind === 'hook') A.hookStop(); else A.vapeStop(); $('meter').classList.remove('on');
   const sec = (performance.now() - holdStart) / 1000;
   if (sec < 0.35) { setHint('Держи подольше, это же затяжка', true); setTimeout(idleHint, 1600); return; }
+  if (holdKind === 'hook') {
+    if (auto) { setHint('Хватит тянуть, выдыхай', true); setTimeout(idleHint, 1800); } else idleHint();
+    exhaleCloud(sec, true); A.exhaleThick(sec); kick = 1;
+    S.hookah++; S.puffSec += sec; today().h = (today().h || 0) + 1; save(); popText('+1 кальянная · ' + sec.toFixed(1) + ' с'); render(); return;
+  }
   if (auto) { A.beep(); setHint('Отсечка 8 секунд, как у настоящей', true); setTimeout(idleHint, 1800); } else idleHint();
   exhaleCloud(sec); A.exhale(sec); kick = 1;
   S.puffs++; S.puffSec += sec; today().p++; save(); popText('+1 затяжка · ' + sec.toFixed(1) + ' с'); render();
 }
 function down(e) { A.unlock(); if (e) e.preventDefault(); if (mode === 'snus') snusClick(); else startPuff(); }
-function up() { if (mode === 'vape') endPuff(false); }
+function up() { if (mode !== 'snus') endPuff(false); }
 stage.addEventListener('pointerdown', e => { if (e.button > 0) return; stage.setPointerCapture?.(e.pointerId); down(e); });
 stage.addEventListener('pointerup', up); stage.addEventListener('pointercancel', up); stage.addEventListener('lostpointercapture', up);
 stage.addEventListener('contextmenu', e => e.preventDefault());
@@ -380,12 +485,13 @@ stage.addEventListener('keyup', e => { if (e.key === ' ' || e.key === 'Enter') u
 function setMode(m) {
   if (holding) endPuff(false);
   mode = m; S.mode = m; save();
-  $('tab-snus').setAttribute('aria-selected', m === 'snus'); $('tab-vape').setAttribute('aria-selected', m === 'vape');
-  stage.setAttribute('aria-label', m === 'snus' ? 'Открыть шайбу' : 'Затянуться: зажми и держи');
+  ['snus', 'vape', 'hook'].forEach(k => $('tab-' + k).setAttribute('aria-selected', m === k));
+  stage.setAttribute('aria-label', m === 'snus' ? 'Открыть шайбу' : m === 'vape' ? 'Затянуться: зажми и держи' : 'Затянуться кальяном: зажми и держи');
   idleHint(); render();
 }
 $('tab-snus').onclick = () => setMode('snus');
 $('tab-vape').onclick = () => setMode('vape');
+$('tab-hook').onclick = () => setMode('hook');
 const syncMute = () => { $('ico-on').hidden = S.muted; $('ico-off').hidden = !S.muted; $('mute').setAttribute('aria-label', S.muted ? 'Включить звук' : 'Выключить звук'); };
 $('mute').onclick = () => { S.muted = !S.muted; A.setMuted(S.muted); syncMute(); save(); };
 
@@ -409,8 +515,9 @@ function render() {
   const q = new Date(S.quitAt); $('since').textContent = `с ${q.getDate()} ${months[q.getMonth()]}, ${pad(q.getHours())}:${pad(q.getMinutes())}`;
   const t = today();
   $('sPuffT').textContent = fmt(t.p); $('sPouchT').textContent = fmt(t.s); $('sPuffA').textContent = fmt(S.puffs); $('sPouchA').textContent = fmt(S.pouches);
-  $('todayN').textContent = fmt(mode === 'snus' ? t.s : t.p);
-  $('todayL').textContent = mode === 'snus' ? 'пакетиков сегодня' : 'затяжек сегодня';
+  $('sHookT').textContent = fmt(t.h || 0); $('sHookA').textContent = fmt(S.hookah);
+  $('todayN').textContent = fmt(mode === 'snus' ? t.s : mode === 'vape' ? t.p : (t.h || 0));
+  $('todayL').textContent = mode === 'snus' ? 'пакетиков сегодня' : mode === 'vape' ? 'затяжек сегодня' : 'кальянных сегодня';
   const np = days * S.cfg.puffs, min = np * S.cfg.sec / 60;
   $('rPuffs').textContent = fmt(np); $('rPouches').textContent = fmt(days * S.cfg.pouches);
   $('rTime').textContent = min < 60 ? fmt(min) + ' мин' : (min / 60).toLocaleString('ru-RU', { maximumFractionDigits: 1 }) + ' ч';
@@ -427,9 +534,11 @@ function frame() {
   // смена режима
   tinS += ((mode === 'snus' ? 1 : 0) - tinS) * Math.min(1, dt * 9);
   vapeS += ((mode === 'vape' ? 1 : 0) - vapeS) * Math.min(1, dt * 9);
-  tin.visible = tinS > 0.01; vape.visible = vapeS > 0.01;
+  hookS += ((mode === 'hook' ? 1 : 0) - hookS) * Math.min(1, dt * 6);
+  tin.visible = tinS > 0.01; vape.visible = vapeS > 0.01; hook.visible = hookS > 0.01; room.visible = hookS > 0.35;
   // камера
-  const wantPos = mode === 'snus' ? [0, 5, 9.4] : [0, 2.9, 11], wantLook = mode === 'snus' ? [0, 0.45, 0] : [0, 1.95, 0];
+  const CAM = { snus: [[0, 5, 9.4], [0, 0.45, 0]], vape: [[0, 2.9, 11], [0, 1.95, 0]], hook: [[0.6, 3.9, 13.2], [0.3, 3.7, 0]] }, wantPos = CAM[mode][0].slice(), wantLook = CAM[mode][1];
+  if (mode === 'hook') wantPos[2] = Math.max(13.2, 4.3 / (0.3057 * camera.aspect));
   camPos.lerp(tmpV.set(...wantPos), Math.min(1, dt * 4)); camLook.lerp(tmpV.set(...wantLook), Math.min(1, dt * 4));
   const push = heat * 0.6;
   camera.position.set(camPos.x + (Math.random() - .5) * heat * 0.015, camPos.y, camPos.z - push); camera.lookAt(camLook);
@@ -453,17 +562,31 @@ function frame() {
   }
 
   // одноразка
-  if (holding) { const el = (now - holdStart) / 1000; heat = Math.min(1, heat + dt * 2.2); $('meter').firstElementChild.style.width = Math.min(100, el / MAX_HOLD * 100) + '%'; if (el >= MAX_HOLD) endPuff(true); }
+  if (holding) { const el = (now - holdStart) / 1000, mx = holdKind === 'hook' ? 14 : MAX_HOLD; heat = Math.min(1, heat + dt * (holdKind === 'hook' ? 1.2 : 2.2)); $('meter').firstElementChild.style.width = Math.min(100, el / mx * 100) + '%'; if (el >= mx) endPuff(true); }
   else heat = Math.max(0, heat - dt * 3);
   kick *= Math.pow(0.02, dt);
-  const flick = holding ? 0.85 + Math.random() * 0.15 : 1;
-  ledMat.color.setRGB(0.23 + heat * 0.27 * flick, 0.21 + heat * 0.7 * flick, 0.31 + heat * 0.69 * flick);
-  glow.material.opacity = heat * 0.9 * flick;
+  const vflick = holding ? 0.85 + Math.random() * 0.15 : 1;
+  const vh = holdKind === 'vape' ? 1 : 0; ledMat.color.setRGB(0.23 + heat * 0.27 * vflick, 0.21 + heat * 0.7 * vflick, 0.31 + heat * 0.69 * vflick);
+  glow.material.opacity = heat * 0.9 * vflick;
   const sv = vapeS * (1 - heat * 0.025);
   vape.scale.set(vapeS * (1 + heat * 0.012), sv, vapeS);
   vape.position.y = 2.05 + Math.sin(time * 1.4) * 0.06 - kick * 0.12;
   vape.rotation.y = Math.sin(time * 0.5) * 0.45; vape.rotation.x = -heat * 0.15;
   rimA.intensity = 1.6 + heat * 1.2;
+
+  // кальян и комната
+  hook.scale.setScalar(hookS); hook.rotation.y = -0.35 + Math.sin(time * 0.3) * 0.08;
+  const hh = holdKind === 'hook' ? heat : 0, cf = 0.9 + Math.random() * 0.1;
+  coalMat.emissiveIntensity = (0.55 + hh * 2.2) * cf; coalGlow.material.opacity = (0.35 + hh * 0.6) * cf; coalGlow.scale.setScalar(1.6 + hh * 1.2); coalLight.intensity = (0.5 + hh * 2.5) * hookS;
+  if (holding && holdKind === 'hook') { bubAcc += dt * (25 + hh * 45); while (bubAcc > 1) { bubAcc--; const b = bubbles[bubIdx++ % bubbles.length];
+    b.m.visible = true; b.m.position.set((Math.random() - .5) * 0.25, 0.3, (Math.random() - .5) * 0.25); b.m.scale.setScalar(0.03 + Math.random() * 0.07); b.v = 1.2 + Math.random() * 1.6; } }
+  for (const b of bubbles) { if (!b.m.visible) continue; b.m.position.y += b.v * dt; b.m.position.x += (Math.random() - .5) * 0.03;
+    const r = 0.95 * Math.max(0.2, 1 - Math.abs(b.m.position.y - 0.5) * 0.2); b.m.position.x = THREE.MathUtils.clamp(b.m.position.x, -r, r); if (b.m.position.y > 0.86) b.m.visible = false; }
+  water.position.y = hh * Math.sin(time * 40) * 0.006;
+  if (flick > 0) flick -= dt; else if (Math.random() < dt * 0.25) flick = 0.06 + Math.random() * 0.18;
+  const nf = flick > 0 ? (Math.random() < 0.5 ? 0.25 : 0.8) : 1;
+  roomMats.forEach(([m, o]) => { m.opacity = o * hookS * ((m === neonMat || m === neonGlowMat) ? nf : 1); });
+  neonLight.intensity = 2.4 * hookS * nf; cyanLight.intensity = 1.2 * hookS;
 
   // пар
   for (const c of clouds) { if (!c.s.visible) continue; c.life += dt; if (c.life < 0) continue;
@@ -472,7 +595,7 @@ function frame() {
     c.s.scale.setScalar(0.5 + c.g * Math.sqrt(k) * 2.6); c.s.material.rotation += dt * 0.3;
     c.s.material.opacity = c.o * (k < 0.12 ? k / 0.12 : 1 - (k - 0.12) / 0.88); }
 
-  shadow.scale.setScalar(mode === 'snus' ? 4.6 : 3.2 - heat * 0.2);
+  shadow.scale.setScalar(mode === 'snus' ? 4.6 : mode === 'hook' ? 4 : 3.2 - heat * 0.2);
   renderer.render(scene, camera);
   requestAnimationFrame(frame);
 }
